@@ -17,18 +17,18 @@
 
 /************************
 
- ####### #     # ####### ######      #####  ######  #     #           #######      #####     
- #     # ##   ## #     # #     #    #     # #     # ##   ##    #    # #           #     #    
- #     # # # # # #     # #     #    #       #     # # # # #    #    # #                 #    
- #     # #  #  # #     # ######     #       #     # #  #  #    #    # ######       #####     
- #     # #     # #     # #          #       #     # #     #    #    #       # ### #          
- #     # #     # #     # #          #     # #     # #     #     #  #  #     # ### #          
- ####### #     # ####### #           #####  ######  #     #      ##    #####  ### #######  
+ ####### #     # ####### ######      #####  ######  #     #           ####### 
+ #     # ##   ## #     # #     #    #     # #     # ##   ##    #    # #       
+ #     # # # # # #     # #     #    #       #     # # # # #    #    # #       
+ #     # #  #  # #     # ######     #       #     # #  #  #    #    # ######  
+ #     # #     # #     # #          #       #     # #     #    #    #       # 
+ #     # #     # #     # #          #     # #     # #     #     #  #  #     # 
+ ####### #     # ####### #           #####  ######  #     #      ##    #####  
                                                                               
 
-script to create OMOP common data model, version 5.2 for PostgreSQL database
+script to create OMOP common data model, version 5.0 for PostgreSQL database
 
-last revised: 14 July 2017
+last revised: 1-May-2016
 
 Authors:  Patrick Ryan, Christian Reich
 
@@ -49,11 +49,11 @@ CREATE TABLE concept (
   domain_id				VARCHAR(20)		NOT NULL,
   vocabulary_id			VARCHAR(20)		NOT NULL,
   concept_class_id		VARCHAR(20)		NOT NULL,
-  standard_concept		CHAR(1)		NULL,
+  standard_concept		VARCHAR(1)		NULL,
   concept_code			VARCHAR(50)		NOT NULL,
   valid_start_date		DATE			NOT NULL,
   valid_end_date		DATE			NOT NULL,
-  invalid_reason		CHAR(1)		NULL
+  invalid_reason		VARCHAR(1)		NULL
 )
 ;
 
@@ -97,7 +97,7 @@ CREATE TABLE concept_relationship (
   relationship_id		VARCHAR(20)		NOT NULL,
   valid_start_date		DATE			NOT NULL,
   valid_end_date		DATE			NOT NULL,
-  invalid_reason		CHAR(1)		NULL)
+  invalid_reason		VARCHAR(1)		NULL)
 ;
 
 
@@ -105,8 +105,8 @@ CREATE TABLE concept_relationship (
 CREATE TABLE relationship (
   relationship_id			VARCHAR(20)		NOT NULL,
   relationship_name			VARCHAR(255)	NOT NULL,
-  is_hierarchical			CHAR(1)		NOT NULL,
-  defines_ancestry			CHAR(1)		NOT NULL,
+  is_hierarchical			VARCHAR(1)		NOT NULL,
+  defines_ancestry			VARCHAR(1)		NOT NULL,
   reverse_relationship_id	VARCHAR(20)		NOT NULL,
   relationship_concept_id	INTEGER			NOT NULL
 )
@@ -140,7 +140,7 @@ CREATE TABLE source_to_concept_map (
   target_vocabulary_id		VARCHAR(20)		NOT NULL,
   valid_start_date			DATE			NOT NULL,
   valid_end_date			DATE			NOT NULL,
-  invalid_reason			CHAR(1)		NULL
+  invalid_reason			VARCHAR(1)		NULL
 )
 ;
 
@@ -156,10 +156,9 @@ CREATE TABLE drug_strength (
   numerator_unit_concept_id		INTEGER		NULL,
   denominator_value				NUMERIC		NULL,
   denominator_unit_concept_id	INTEGER		NULL,
-  box_size						INTEGER		NULL,
   valid_start_date				DATE		NOT NULL,
   valid_end_date				DATE		NOT NULL,
-  invalid_reason				CHAR(1)	NULL
+  invalid_reason				VARCHAR(1)	NULL
 )
 ;
 
@@ -229,7 +228,7 @@ CREATE TABLE person
      year_of_birth					INTEGER		NOT NULL , 
      month_of_birth					INTEGER		NULL, 
      day_of_birth					INTEGER		NULL, 
-	   birth_datetime					TIMESTAMP 	NULL,
+	 time_of_birth					VARCHAR(10)	NULL,
      race_concept_id				INTEGER		NOT NULL, 
      ethnicity_concept_id			INTEGER		NOT NULL, 
      location_id					INTEGER		NULL, 
@@ -254,9 +253,7 @@ CREATE TABLE observation_period
      observation_period_id				INTEGER		NOT NULL , 
      person_id							INTEGER		NOT NULL , 
      observation_period_start_date		DATE		NOT NULL , 
-     observation_period_start_datetime		TIMESTAMP		NOT NULL ,
      observation_period_end_date		DATE		NOT NULL ,
-     observation_period_end_datetime		TIMESTAMP		NOT NULL ,
 	 period_type_concept_id				INTEGER		NOT NULL
     ) 
 ;
@@ -266,11 +263,11 @@ CREATE TABLE observation_period
 CREATE TABLE specimen
     ( 
      specimen_id						INTEGER			NOT NULL ,
-	 person_id							INTEGER			NOT NULL ,
+	 person_id							bigint			NOT NULL ,
 	 specimen_concept_id				INTEGER			NOT NULL ,
 	 specimen_type_concept_id			INTEGER			NOT NULL ,
 	 specimen_date						DATE			NOT NULL ,
-	 specimen_datetime						TIMESTAMP		NULL ,
+	 specimen_time						VARCHAR(10)		NULL ,
 	 quantity							NUMERIC			NULL ,
 	 unit_concept_id					INTEGER			NULL ,
 	 anatomic_site_concept_id			INTEGER			NULL ,
@@ -289,8 +286,7 @@ CREATE TABLE death
     ( 
      person_id							INTEGER			NOT NULL , 
      death_date							DATE			NOT NULL , 
-     death_datetime							TIMESTAMP			NULL ,
-     death_type_concept_id				INTEGER			NOT NULL ,
+     death_type_concept_id				INTEGER			NOT NULL , 
      cause_concept_id					INTEGER			NULL , 
      cause_source_value					VARCHAR(50)		NULL,
 	 cause_source_concept_id			INTEGER			NULL
@@ -305,19 +301,14 @@ CREATE TABLE visit_occurrence
      person_id						INTEGER			NOT NULL , 
      visit_concept_id				INTEGER			NOT NULL , 
 	 visit_start_date				DATE			NOT NULL , 
-	 visit_start_datetime			TIMESTAMP		NULL ,
+	 visit_start_time				VARCHAR(10)		NULL ,
      visit_end_date					DATE			NOT NULL ,
-	 visit_end_datetime				TIMESTAMP		NULL ,
+	 visit_end_time					VARCHAR(10)		NULL , 
 	 visit_type_concept_id			INTEGER			NOT NULL ,
 	 provider_id					INTEGER			NULL,
      care_site_id					INTEGER			NULL, 
      visit_source_value				VARCHAR(50)		NULL,
-	 visit_source_concept_id		INTEGER			NULL ,
-	 admitting_source_concept_id	INTEGER			NULL ,
-	 admitting_source_value			VARCHAR(50)		NULL ,
-	 discharge_to_concept_id		INTEGER		NULL ,
-	 discharge_to_source_value		VARCHAR(50)		NULL ,
-	 preceding_visit_occurrence_id	INTEGER			NULL
+	 visit_source_concept_id		INTEGER			NULL
     ) 
 ;
 
@@ -329,7 +320,6 @@ CREATE TABLE procedure_occurrence
      person_id						INTEGER			NOT NULL , 
      procedure_concept_id			INTEGER			NOT NULL , 
      procedure_date					DATE			NOT NULL , 
-     procedure_datetime					TIMESTAMP			NOT NULL ,
      procedure_type_concept_id		INTEGER			NOT NULL ,
 	 modifier_concept_id			INTEGER			NULL ,
 	 quantity						INTEGER			NULL , 
@@ -349,17 +339,16 @@ CREATE TABLE drug_exposure
      person_id						INTEGER			NOT NULL , 
      drug_concept_id				INTEGER			NOT NULL , 
      drug_exposure_start_date		DATE			NOT NULL , 
-     drug_exposure_start_datetime	TIMESTAMP		NOT NULL ,
-     drug_exposure_end_date			DATE			NOT NULL ,
-     drug_exposure_end_datetime		TIMESTAMP		NULL ,
-     verbatim_end_date				DATE			NULL ,
-	 drug_type_concept_id			INTEGER			NOT NULL ,
+     drug_exposure_end_date			DATE			NULL , 
+     drug_type_concept_id			INTEGER			NOT NULL , 
      stop_reason					VARCHAR(20)		NULL , 
      refills						INTEGER			NULL , 
      quantity						NUMERIC			NULL , 
      days_supply					INTEGER			NULL , 
      sig							TEXT	NULL , 
 	 route_concept_id				INTEGER			NULL ,
+	 effective_drug_dose			NUMERIC			NULL ,
+	 dose_unit_concept_id			INTEGER			NULL ,
 	 lot_number						VARCHAR(50)		NULL ,
      provider_id					INTEGER			NULL , 
      visit_occurrence_id			INTEGER			NULL , 
@@ -377,10 +366,8 @@ CREATE TABLE device_exposure
      person_id						INTEGER			NOT NULL , 
      device_concept_id				INTEGER			NOT NULL , 
      device_exposure_start_date		DATE			NOT NULL , 
-     device_exposure_start_datetime		TIMESTAMP			NOT NULL ,
-     device_exposure_end_date		DATE			NULL ,
-     device_exposure_end_datetime		TIMESTAMP			NULL ,
-     device_type_concept_id			INTEGER			NOT NULL ,
+     device_exposure_end_date		DATE			NULL , 
+     device_type_concept_id			INTEGER			NOT NULL , 
 	 unique_device_id				VARCHAR(50)		NULL ,
 	 quantity						INTEGER			NULL ,
      provider_id					INTEGER			NULL , 
@@ -397,17 +384,13 @@ CREATE TABLE condition_occurrence
      person_id						INTEGER			NOT NULL , 
      condition_concept_id			INTEGER			NOT NULL , 
      condition_start_date			DATE			NOT NULL , 
-     condition_start_datetime			TIMESTAMP			NOT NULL ,
-     condition_end_date				DATE			NULL ,
-     condition_end_datetime				TIMESTAMP			NULL ,
-     condition_type_concept_id		INTEGER			NOT NULL ,
+     condition_end_date				DATE			NULL , 
+     condition_type_concept_id		INTEGER			NOT NULL , 
      stop_reason					VARCHAR(20)		NULL , 
      provider_id					INTEGER			NULL , 
      visit_occurrence_id			INTEGER			NULL , 
      condition_source_value			VARCHAR(50)		NULL ,
-	 condition_source_concept_id	INTEGER			NULL ,
-	 condition_status_source_value	VARCHAR(50)		NULL ,
-     condition_status_concept_id	INTEGER			NULL 
+	 condition_source_concept_id	INTEGER			NULL
     ) 
 ;
 
@@ -419,7 +402,7 @@ CREATE TABLE measurement
      person_id						INTEGER			NOT NULL , 
      measurement_concept_id			INTEGER			NOT NULL , 
      measurement_date				DATE			NOT NULL , 
-     measurement_datetime				TIMESTAMP		NULL ,
+     measurement_time				VARCHAR(10)		NULL ,
 	 measurement_type_concept_id	INTEGER			NOT NULL ,
 	 operator_concept_id			INTEGER			NULL , 
      value_as_number				NUMERIC			NULL , 
@@ -443,13 +426,9 @@ CREATE TABLE note
      note_id						INTEGER			NOT NULL , 
      person_id						INTEGER			NOT NULL , 
      note_date						DATE			NOT NULL ,
-	 note_datetime						TIMESTAMP		NULL ,
+	 note_time						VARCHAR(10)		NULL ,
 	 note_type_concept_id			INTEGER			NOT NULL ,
-	 note_class_concept_id			INTEGER			NOT NULL ,
-	 note_title						VARCHAR(250)	NULL ,
-	 note_text						TEXT			NOT NULL ,
-	 encoding_concept_id			INTEGER			NOT NULL ,
-	 language_concept_id			INTEGER			NOT NULL ,
+	 note_text						TEXT	NOT NULL ,
      provider_id					INTEGER			NULL ,
 	 visit_occurrence_id			INTEGER			NULL ,
 	 note_source_value				VARCHAR(50)		NULL
@@ -458,34 +437,13 @@ CREATE TABLE note
 
 
 
-/*This table is new in CDM v5.2*/
-CREATE TABLE note_nlp
-(
-  note_nlp_id					BIGINT			NOT NULL ,
-  note_id						INTEGER			NOT NULL ,
-  section_concept_id			INTEGER			NULL ,
-  snippet						VARCHAR(250)	NULL ,
-  "offset"						VARCHAR(250)	NULL ,
-  lexical_variant				VARCHAR(250)	NOT NULL ,
-  note_nlp_concept_id			INTEGER			NULL ,
-  note_nlp_source_concept_id	INTEGER			NULL ,
-  nlp_system					VARCHAR(250)	NULL ,
-  nlp_date						DATE			NOT NULL ,
-  nlp_datetime					TIMESTAMP		NULL ,
-  term_exists					CHAR(1)		NULL ,
-  term_temporal					VARCHAR(50)		NULL ,
-  term_modifiers				VARCHAR(2000)	NULL
-)
-;
-
-
 CREATE TABLE observation 
     ( 
      observation_id					INTEGER			NOT NULL , 
      person_id						INTEGER			NOT NULL , 
      observation_concept_id			INTEGER			NOT NULL , 
      observation_date				DATE			NOT NULL , 
-     observation_datetime				TIMESTAMP		NULL ,
+     observation_time				VARCHAR(10)		NULL , 
      observation_type_concept_id	INTEGER			NOT NULL , 
 	 value_as_number				NUMERIC			NULL , 
      value_as_string				VARCHAR(60)		NULL , 
@@ -530,7 +488,7 @@ CREATE TABLE location
      address_1						VARCHAR(50)		NULL , 
      address_2						VARCHAR(50)		NULL , 
      city							VARCHAR(50)		NULL , 
-     state							CHAR(2)		NULL , 
+     state							VARCHAR(2)		NULL , 
      zip							VARCHAR(9)		NULL , 
      county							VARCHAR(20)		NULL , 
      location_source_value			VARCHAR(50)		NULL
@@ -593,6 +551,85 @@ CREATE TABLE payer_plan_period
 ;
 
 
+/* The individual cost tables are being phased out and will disappear soon
+
+CREATE TABLE visit_cost 
+    ( 
+     visit_cost_id					INTEGER			NOT NULL , 
+     visit_occurrence_id			INTEGER			NOT NULL , 
+	 currency_concept_id			INTEGER			NULL ,
+     paid_copay						NUMERIC			NULL , 
+     paid_coinsurance				NUMERIC			NULL , 
+     paid_toward_deductible			NUMERIC			NULL , 
+     paid_by_payer					NUMERIC			NULL , 
+     paid_by_coordination_benefits	NUMERIC			NULL , 
+     total_out_of_pocket			NUMERIC			NULL , 
+     total_paid						NUMERIC			NULL ,  
+     payer_plan_period_id			INTEGER			NULL
+    ) 
+;
+
+
+
+CREATE TABLE procedure_cost 
+    ( 
+     procedure_cost_id				INTEGER			NOT NULL , 
+     procedure_occurrence_id		INTEGER			NOT NULL , 
+     currency_concept_id			INTEGER			NULL ,
+     paid_copay						NUMERIC			NULL , 
+     paid_coinsurance				NUMERIC			NULL , 
+     paid_toward_deductible			NUMERIC			NULL , 
+     paid_by_payer					NUMERIC			NULL , 
+     paid_by_coordination_benefits	NUMERIC			NULL , 
+     total_out_of_pocket			NUMERIC			NULL , 
+     total_paid						NUMERIC			NULL ,
+	 revenue_code_concept_id		INTEGER			NULL ,  
+     payer_plan_period_id			INTEGER			NULL ,
+	 revenue_code_source_value		VARCHAR(50)		NULL
+	) 
+;
+
+
+
+CREATE TABLE drug_cost 
+    (
+     drug_cost_id					INTEGER			NOT NULL , 
+     drug_exposure_id				INTEGER			NOT NULL , 
+     currency_concept_id			INTEGER			NULL ,
+     paid_copay						NUMERIC			NULL , 
+     paid_coinsurance				NUMERIC			NULL , 
+     paid_toward_deductible			NUMERIC			NULL , 
+     paid_by_payer					NUMERIC			NULL , 
+     paid_by_coordination_benefits	NUMERIC			NULL , 
+     total_out_of_pocket			NUMERIC			NULL , 
+     total_paid						NUMERIC			NULL , 
+     ingredient_cost				NUMERIC			NULL , 
+     dispensing_fee					NUMERIC			NULL , 
+     average_wholesale_price		NUMERIC			NULL , 
+     payer_plan_period_id			INTEGER			NULL
+    ) 
+;
+
+
+
+
+
+CREATE TABLE device_cost 
+    (
+     device_cost_id					INTEGER			NOT NULL , 
+     device_exposure_id				INTEGER			NOT NULL , 
+     currency_concept_id			INTEGER			NULL ,
+     paid_copay						NUMERIC			NULL , 
+     paid_coinsurance				NUMERIC			NULL , 
+     paid_toward_deductible			NUMERIC			NULL , 
+     paid_by_payer					NUMERIC			NULL , 
+     paid_by_coordination_benefits	NUMERIC			NULL , 
+     total_out_of_pocket			NUMERIC			NULL , 
+     total_paid						NUMERIC			NULL , 
+     payer_plan_period_id			INTEGER			NULL
+    ) 
+;
+*/
 
 
 CREATE TABLE cost 
@@ -616,9 +653,7 @@ CREATE TABLE cost
      payer_plan_period_id			INTEGER			NULL ,
      amount_allowed		NUMERIC			NULL , 
      revenue_code_concept_id		INTEGER			NULL , 
-     reveue_code_source_value    VARCHAR(50)   NULL ,
-	 drg_concept_id			INTEGER		NULL,
-     drg_source_value		CHAR(3)		NULL
+     reveue_code_source_value    VARCHAR(50)   NULL
     ) 
 ;
 
@@ -696,8 +731,6 @@ CREATE TABLE condition_era
     ) 
 ;
 
-
-
 /********
 Genomic Table
 *********/
@@ -708,7 +741,6 @@ CREATE TABLE genomic_copy_number_variation (
   "panel"             varchar(15),
   "cli_rrpt_id"       varchar(15),
   "mut_type"          varchar(64),
-  "smp_id"            varchar(15),
   "prj_id"            varchar(15),
   "sec_id"            varchar(5),
   "type"              varchar(3),
@@ -733,10 +765,8 @@ CREATE TABLE genomic_single_nucleotide_variants (
   "panel"             varchar(15),
   "cli_rrpt_id"       varchar(15),
   "mut_type"          varchar(64),
-  "smp_id"            varchar(15),
   "prj_id"            varchar(15),
   "sec_id"            varchar(15),
-  "gene"              varchar(15),
   "ens_id"            varchar(15),
   "mutation_status"   varchar(10),
   "chromosome"        varchar(10),
@@ -759,7 +789,7 @@ CREATE TABLE genomic_single_nucleotide_variants (
   "n_var_depth"       int8,
   "allele_freq"       float4,
   "strand"            varchar(10),
-  "eoxn"              varchar(15),
+  "exon"              varchar(15),
   "intron"            int8,
   "sift"              varchar(20),
   "polyphen"          varchar(30),
@@ -767,7 +797,7 @@ CREATE TABLE genomic_single_nucleotide_variants (
   "hrd"               varchar(3),
   "mmr"               varchar(3),
   "zygosity"          varchar(15),
-  "transcriptrank"    int4,
+  "transcript"      int4,
   "diagnosis"         varchar(30),
   "drug"              varchar(50),
   "drugable"          varchar(3),
@@ -782,7 +812,6 @@ CREATE TABLE genomic_structural_variation (
   "update_datetime" date,
   "cli_rrpt_id"     varchar(15),
   "mut_type"        varchar(64),
-  "smp_id"          varchar(15),
   "prj_id"          varchar(15),
   "sec_id"          varchar(5),
   "breakpoint"      varchar(64),
@@ -792,7 +821,8 @@ CREATE TABLE genomic_structural_variation (
   "rep_overlap"     varchar(32),
   "sv_type"         varchar(13),
   "read_count"      varchar(10),
-  "gene_concept_id" int4,
+  "gene1_concept_id" int4,
+  "gene2_concept_id" int4,
   "nkmers"          int8,
   "disc_read_count" int8,
   "breakpoint_cov"  varchar(15),
@@ -805,8 +835,6 @@ CREATE TABLE genomic_structural_variation (
   "rearrangement_target" varchar(3),
   "specimen_id" int4
 );
-
-
 
 
 

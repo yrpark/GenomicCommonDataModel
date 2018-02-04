@@ -17,16 +17,16 @@
 
 /************************
 
- ####### #     # ####### ######      #####  ######  #     #           #######      #####      #####                                                                 
- #     # ##   ## #     # #     #    #     # #     # ##   ##    #    # #           #     #    #     #  ####  #    #  ####  ##### #####    ##   # #    # #####  ####  
- #     # # # # # #     # #     #    #       #     # # # # #    #    # #                 #    #       #    # ##   # #        #   #    #  #  #  # ##   #   #   #      
- #     # #  #  # #     # ######     #       #     # #  #  #    #    # ######       #####     #       #    # # #  #  ####    #   #    # #    # # # #  #   #    ####  
- #     # #     # #     # #          #       #     # #     #    #    #       # ### #          #       #    # #  # #      #   #   #####  ###### # #  # #   #        # 
- #     # #     # #     # #          #     # #     # #     #     #  #  #     # ### #          #     # #    # #   ## #    #   #   #   #  #    # # #   ##   #   #    # 
- ####### #     # ####### #           #####  ######  #     #      ##    #####  ### #######     #####   ####  #    #  ####    #   #    # #    # # #    #   #    ####  
+ ####### #     # ####### ######      #####  ######  #     #           #######     #####                                                                 
+ #     # ##   ## #     # #     #    #     # #     # ##   ##    #    # #          #     #  ####  #    #  ####  ##### #####    ##   # #    # #####  ####  
+ #     # # # # # #     # #     #    #       #     # # # # #    #    # #          #       #    # ##   # #        #   #    #  #  #  # ##   #   #   #      
+ #     # #  #  # #     # ######     #       #     # #  #  #    #    # ######     #       #    # # #  #  ####    #   #    # #    # # # #  #   #    ####  
+ #     # #     # #     # #          #       #     # #     #    #    #       #    #       #    # #  # #      #   #   #####  ###### # #  # #   #        # 
+ #     # #     # #     # #          #     # #     # #     #     #  #  #     #    #     # #    # #   ## #    #   #   #   #  #    # # #   ##   #   #    # 
+ ####### #     # ####### #           #####  ######  #     #      ##    #####      #####   ####  #    #  ####    #   #    # #    # # #    #   #    ####  
                                                                               
 
-script to create constraints within OMOP common data model, version 5.1.0 for SQL Server database
+script to create constraints within OMOP common data model, version 5.0 for SQL Server database
 
 last revised: 12 Oct 2014
 
@@ -126,8 +126,6 @@ ALTER TABLE measurement ADD CONSTRAINT xpk_measurement PRIMARY KEY NONCLUSTERED 
 
 ALTER TABLE note ADD CONSTRAINT xpk_note PRIMARY KEY NONCLUSTERED ( note_id ) ;
 
-ALTER TABLE note_nlp ADD CONSTRAINT xpk_note_nlp PRIMARY KEY NONCLUSTERED ( note_nlp_id ) ;
-
 ALTER TABLE observation  ADD CONSTRAINT xpk_observation PRIMARY KEY NONCLUSTERED ( observation_id ) ;
 
 
@@ -157,7 +155,14 @@ Standardized health economics
 
 ALTER TABLE payer_plan_period ADD CONSTRAINT xpk_payer_plan_period PRIMARY KEY NONCLUSTERED ( payer_plan_period_id ) ;
 
-ALTER TABLE cost ADD CONSTRAINT xpk_visit_cost PRIMARY KEY NONCLUSTERED ( cost_id ) ;
+ALTER TABLE visit_cost ADD CONSTRAINT xpk_visit_cost PRIMARY KEY NONCLUSTERED ( visit_cost_id ) ;
+
+ALTER TABLE procedure_cost ADD CONSTRAINT xpk_procedure_cost PRIMARY KEY NONCLUSTERED ( procedure_cost_id ) ;
+
+ALTER TABLE drug_cost ADD CONSTRAINT xpk_drug_cost PRIMARY KEY NONCLUSTERED ( drug_cost_id ) ;
+
+ALTER TABLE device_cost ADD CONSTRAINT xpk_device_cost PRIMARY KEY NONCLUSTERED ( device_cost_id ) ;
+
 
 
 /************************
@@ -332,10 +337,6 @@ ALTER TABLE visit_occurrence ADD CONSTRAINT fpk_visit_care_site FOREIGN KEY (car
 
 ALTER TABLE visit_occurrence ADD CONSTRAINT fpk_visit_concept_s FOREIGN KEY (visit_source_concept_id)  REFERENCES concept (concept_id);
 
-ALTER TABLE visit_occurrence ADD CONSTRAINT fpk_visit_admitting_s FOREIGN KEY (admitting_source_concept_id) REFERENCES concept (concept_id);
-
-ALTER TABLE visit_occurrence ADD CONSTRAINT fpk_visit_discharge FOREIGN KEY (discharge_to_concept_id) REFERENCES concept (concept_id);
-
 
 ALTER TABLE procedure_occurrence ADD CONSTRAINT fpk_procedure_person FOREIGN KEY (person_id)  REFERENCES person (person_id);
 
@@ -359,6 +360,8 @@ ALTER TABLE drug_exposure ADD CONSTRAINT fpk_drug_concept FOREIGN KEY (drug_conc
 ALTER TABLE drug_exposure ADD CONSTRAINT fpk_drug_type_concept FOREIGN KEY (drug_type_concept_id)  REFERENCES concept (concept_id);
 
 ALTER TABLE drug_exposure ADD CONSTRAINT fpk_drug_route_concept FOREIGN KEY (route_concept_id)  REFERENCES concept (concept_id);
+
+ALTER TABLE drug_exposure ADD CONSTRAINT fpk_drug_dose_unit_concept FOREIGN KEY (dose_unit_concept_id)  REFERENCES concept (concept_id);
 
 ALTER TABLE drug_exposure ADD CONSTRAINT fpk_drug_provider FOREIGN KEY (provider_id)  REFERENCES provider (provider_id);
 
@@ -392,8 +395,6 @@ ALTER TABLE condition_occurrence ADD CONSTRAINT fpk_condition_visit FOREIGN KEY 
 
 ALTER TABLE condition_occurrence ADD CONSTRAINT fpk_condition_concept_s FOREIGN KEY (condition_source_concept_id)  REFERENCES concept (concept_id);
 
-ALTER TABLE condition_occurrence ADD CONSTRAINT fpk_condition_status_concept FOREIGN KEY (condition_status_concept_id) REFERENCES concept (concept_id);
-
 
 ALTER TABLE measurement ADD CONSTRAINT fpk_measurement_person FOREIGN KEY (person_id)  REFERENCES person (person_id);
 
@@ -418,23 +419,9 @@ ALTER TABLE note ADD CONSTRAINT fpk_note_person FOREIGN KEY (person_id)  REFEREN
 
 ALTER TABLE note ADD CONSTRAINT fpk_note_type_concept FOREIGN KEY (note_type_concept_id)  REFERENCES concept (concept_id);
 
-ALTER TABLE note ADD CONSTRAINT fpk_note_class_concept FOREIGN KEY (note_class_concept_id) REFERENCES concept (concept_id);
-
-ALTER TABLE note ADD CONSTRAINT fpk_note_encoding_concept FOREIGN KEY (encoding_concept_id) REFERENCES concept (concept_id);
-
-ALTER TABLE note ADD CONSTRAINT fpk_language_concept FOREIGN KEY (language_concept_id) REFERENCES concept (concept_id);
-
 ALTER TABLE note ADD CONSTRAINT fpk_note_provider FOREIGN KEY (provider_id)  REFERENCES provider (provider_id);
 
 ALTER TABLE note ADD CONSTRAINT fpk_note_visit FOREIGN KEY (visit_occurrence_id)  REFERENCES visit_occurrence (visit_occurrence_id);
-
-
-ALTER TABLE note_nlp ADD CONSTRAINT fpk_note_nlp_note FOREIGN KEY (note_id) REFERENCES note (note_id);
-
-ALTER TABLE note_nlp ADD CONSTRAINT fpk_note_nlp_section_concept FOREIGN KEY (section_concept_id) REFERENCES concept (concept_id);
-
-ALTER TABLE note_nlp ADD CONSTRAINT fpk_note_nlp_concept FOREIGN KEY (note_nlp_concept_id) REFERENCES concept (concept_id); 
-
 
 
 ALTER TABLE observation ADD CONSTRAINT fpk_observation_person FOREIGN KEY (person_id)  REFERENCES person (person_id);
@@ -496,11 +483,40 @@ Standardized health economics
 
 ALTER TABLE payer_plan_period ADD CONSTRAINT fpk_payer_plan_period FOREIGN KEY (person_id)  REFERENCES person (person_id);
 
-ALTER TABLE cost ADD CONSTRAINT fpk_visit_cost_currency FOREIGN KEY (currency_concept_id)  REFERENCES concept (concept_id);
 
-ALTER TABLE cost ADD CONSTRAINT fpk_visit_cost_period FOREIGN KEY (payer_plan_period_id)  REFERENCES payer_plan_period (payer_plan_period_id);
+ALTER TABLE visit_cost ADD CONSTRAINT fpk_visit_cost_id FOREIGN KEY (visit_occurrence_id)  REFERENCES visit_occurrence (visit_occurrence_id);
 
-ALTER TABLE cost ADD CONSTRAINT fpk_drg_concept FOREIGN KEY (drg_concept_id) REFERENCES concept (concept_id);
+ALTER TABLE visit_cost ADD CONSTRAINT fpk_visit_cost_currency FOREIGN KEY (currency_concept_id)  REFERENCES concept (concept_id);
+
+ALTER TABLE visit_cost ADD CONSTRAINT fpk_visit_cost_period FOREIGN KEY (payer_plan_period_id)  REFERENCES payer_plan_period (payer_plan_period_id);
+
+
+ALTER TABLE procedure_cost ADD CONSTRAINT fpk_procedure_cost_id FOREIGN KEY (procedure_occurrence_id)  REFERENCES procedure_occurrence (procedure_occurrence_id);
+
+ALTER TABLE procedure_cost ADD CONSTRAINT fpk_procedure_cost_currency FOREIGN KEY (currency_concept_id)  REFERENCES concept (concept_id);
+
+ALTER TABLE procedure_cost ADD CONSTRAINT fpk_procedure_cost_period FOREIGN KEY (payer_plan_period_id)  REFERENCES payer_plan_period (payer_plan_period_id);
+
+ALTER TABLE procedure_cost ADD CONSTRAINT fpk_procedure_cost_revenue FOREIGN KEY (revenue_code_concept_id)  REFERENCES concept (concept_id);
+
+
+ALTER TABLE drug_cost ADD CONSTRAINT fpk_drug_cost_id FOREIGN KEY (drug_exposure_id)  REFERENCES drug_exposure (drug_exposure_id);
+
+ALTER TABLE drug_cost ADD CONSTRAINT fpk_drug_cost_currency FOREIGN KEY (currency_concept_id)  REFERENCES concept (concept_id);
+
+ALTER TABLE drug_cost ADD CONSTRAINT fpk_drug_cost_period FOREIGN KEY (payer_plan_period_id)  REFERENCES payer_plan_period (payer_plan_period_id);
+
+
+ALTER TABLE device_cost ADD CONSTRAINT fpk_device_cost_id FOREIGN KEY (device_exposure_id)  REFERENCES device_exposure (device_exposure_id);
+
+ALTER TABLE device_cost ADD CONSTRAINT fpk_device_cost_currency FOREIGN KEY (currency_concept_id)  REFERENCES concept (concept_id);
+
+ALTER TABLE device_cost ADD CONSTRAINT fpk_device_cost_period FOREIGN KEY (payer_plan_period_id)  REFERENCES payer_plan_period (payer_plan_period_id);
+
+
+
+
+
 
 /************************
 
@@ -537,13 +553,13 @@ ALTER TABLE condition_era ADD CONSTRAINT fpk_condition_era_concept FOREIGN KEY (
 
 
 
-
 /*********************
 Genomic Table FK
 *********************/
 
 ALTER TABLE genomic_structural_variation ADD CONSTRAINT fpk_genomic_structural_variation_specimen FOREIGN KEY (specimen_id) REFERENCES specimen (specimen_id);
-ALTER TABLE genomic_structural_variation ADD CONSTRAINT fpk_genomic_structural_variation_gene_concept FOREIGN KEY (gene_concept_id) REFERENCES concept (concept_id);
+ALTER TABLE genomic_structural_variation ADD CONSTRAINT fpk_genomic_structural_variation_gene1_concept FOREIGN KEY (gene1_concept_id) REFERENCES concept (concept_id);
+ALTER TABLE genomic_structural_variation ADD CONSTRAINT fpk_genomic_structural_variation_gene2_concept FOREIGN KEY (gene2_concept_id) REFERENCES concept (concept_id);
 
 ALTER TABLE genomic_single_nucleotide_variants ADD CONSTRAINT fpk_genomic_single_nucleotide_variants_specimen FOREIGN KEY (specimen_id) REFERENCES specimen (specimen_id);
 ALTER TABLE genomic_single_nucleotide_variants ADD CONSTRAINT fpk_genomic_single_nucieotide_variatits_gene_concept FOREIGN KEY (gene_concept_id) REFERENCES concept (concept_id);
